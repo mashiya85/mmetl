@@ -456,7 +456,15 @@ func (t *Transformer) TransformPosts(slackExport *SlackExport, attachmentsDir st
 			// bot message
 			case post.IsBotMessage():
 				// log.Println("Slack Import: bot messages are not yet supported")
-				break
+				newPost := &IntermediatePost{
+					User:     "root",
+					Channel:  channel.Name,
+					Message:  post.Text,
+					CreateAt: SlackConvertTimeStamp(post.TimeStamp),
+					Props: model.StringInterface{"from_webhook": "true", "override_username": post.BotUsername, "attachments": post.Attachments},
+				}
+
+				AddPostToThreads(post, newPost, threads, channel, timestamps)
 
 			// channel join/leave messages
 			case post.IsJoinLeaveMessage():
